@@ -1,4 +1,4 @@
-from django.db.models import ProtectedError
+from django.db.models import RestrictedError
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
@@ -18,7 +18,7 @@ class CategoryViewSet(OwnedQuerysetMixin, viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         try:
             return super().destroy(request, *args, **kwargs)
-        except ProtectedError:
+        except RestrictedError:
             return Response(
                 {"detail": "This category has transactions; reassign or delete them first."},
                 status=status.HTTP_409_CONFLICT,

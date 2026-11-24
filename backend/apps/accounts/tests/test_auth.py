@@ -104,3 +104,14 @@ def test_change_password(auth_client, user):
 def test_endpoints_require_authentication(api_client):
     assert api_client.get(reverse("auth-me")).status_code == 401
     assert api_client.get(reverse("category-list")).status_code == 401
+
+
+def test_deleting_a_user_cascades_to_all_their_data(user):
+    from apps.core.tests.factories import BudgetFactory, TransactionFactory
+    from apps.transactions.models import Transaction
+
+    tx = TransactionFactory(user=user)
+    BudgetFactory(user=user, category=tx.category)
+    user.delete()
+    assert not Transaction.objects.exists()
+    assert not Category.objects.exists()

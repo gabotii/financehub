@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements/*.txt
+      - run: pip install -r requirements/dev.txt
+      - run: ruff check .
+      - run: ruff format --check .
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: financehub
+          POSTGRES_USER: financehub
+          POSTGRES_PASSWORD: financehub
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U financehub"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DJANGO_SECRET_KEY: ci-only-secret
+      DJANGO_DEBUG: "False"
+      DJANGO_SECURE_SSL_REDIRECT: "False"
+      DATABASE_URL: postgres://financehub:financehub@localhost:5432/financehub
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements/*.txt
+      - run: pip install -r requirements/dev.txt
+      - run: python manage.py makemigrations --check --dry-run
+      - run: python manage.py spectacular --validate --fail-on-warn --file /tmp/schema.yml
+      - run: pytest --cov=apps --cov-report=term-missing:skip-covered
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --build-arg REQUIREMENTS=base.txt -t financehub-backend backend

@@ -18,7 +18,9 @@ class Transaction(TimeStampedModel):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="transactions"
     )
-    category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="transactions")
+    # RESTRICT (not PROTECT): a category with transactions can't be deleted on its own,
+    # but deleting the user still cascades through both.
+    category = models.ForeignKey(Category, on_delete=models.RESTRICT, related_name="transactions")
     amount = models.DecimalField(
         max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))]
     )
