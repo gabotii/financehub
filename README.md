@@ -141,3 +141,4 @@ docker-compose.yml       development stack (db + backend + frontend)
 docker-compose.prod.yml  production-like stack
 .github/workflows/ci.yml lint, tests, frontend build and Docker build
 ```
+<img width="1915" height="894" alt="image" src="https://github.com/user-attachments/assets/4fbc9edf-f524-44b2-89dd-d1e1add6a08a" />
