@@ -8,3 +8,6 @@ __pycache__/
 htmlcov/
 backend/staticfiles/
 .env.prod
+node_modules/
+frontend/dist/
+*.tsbuildinfo

@@ -1,7 +1,8 @@
 # FinanceHub
 
-A personal-finance REST API built with Django 5.2, Django REST Framework and PostgreSQL,
-fully containerised with Docker.
+A personal-finance app: a REST API built with Django 5.2, Django REST Framework and
+PostgreSQL, plus a React + TypeScript single-page frontend, fully containerised with
+Docker.
 
 Users track income and expenses by category, set monthly budgets per category and get
 analytics (balance, savings rate, spending breakdown and monthly trends).
@@ -21,14 +22,18 @@ analytics (balance, savings rate, spending breakdown and monthly trends).
 - **Analytics**: a period summary, a per-category breakdown and a monthly income vs.
   expense trend. Months with no activity are included as zeros.
 - **OpenAPI docs** with Swagger UI, plus a health-check endpoint for container probes.
+- **React frontend** (Spanish UI) with a dashboard, transactions, budgets and categories
+  pages. Charts are hand-built in SVG with hover tooltips and a table view, using a
+  colour-blind-safe palette. Light and dark themes, responsive down to phone width.
+  JWT tokens refresh automatically.
 - **46 pytest tests** run against real PostgreSQL. CI covers linting, tests, migration
   drift, schema validation and the Docker build.
 
 ## Tech stack
 
 Python 3.13 · Django 5.2 · DRF · SimpleJWT · django-filter · drf-spectacular ·
-PostgreSQL 17 · Gunicorn · WhiteNoise · Docker Compose · pytest · factory-boy · Ruff ·
-GitHub Actions
+PostgreSQL 17 · Gunicorn · WhiteNoise · React 19 · TypeScript · Vite · React Router ·
+Docker Compose · pytest · factory-boy · Ruff · GitHub Actions
 
 ## Quick start (Docker)
 
@@ -38,6 +43,7 @@ docker compose up --build
 docker compose exec backend python manage.py seed_demo   # optional demo data
 ```
 
+- **App: <http://localhost:5173>**. The Vite dev server proxies `/api` to Django.
 - API: <http://localhost:8000/api/v1/>
 - Swagger UI: <http://localhost:8000/api/docs/>
 - Admin: <http://localhost:8000/admin/> (create a user with
@@ -127,7 +133,11 @@ backend/
     budgets/         monthly budgets with computed spending
     analytics/       aggregation services and report endpoints
   conftest.py        shared pytest fixtures
-docker-compose.yml       development stack
+frontend/
+  src/api.ts         typed API client with token refresh
+  src/pages/         dashboard, transactions, budgets, categories, auth
+  src/components/    layout, SVG charts, budget progress, modal
+docker-compose.yml       development stack (db + backend + frontend)
 docker-compose.prod.yml  production-like stack
-.github/workflows/ci.yml lint, test and Docker build
+.github/workflows/ci.yml lint, tests, frontend build and Docker build
 ```
